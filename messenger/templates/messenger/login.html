@@ -1,3 +1,6 @@
+{% if error %}
+{{error}}
+{% endif %}
 <form action="{% url 'messenger:login' %}" method="post">
 {% csrf_token %}
  <div class="container">
