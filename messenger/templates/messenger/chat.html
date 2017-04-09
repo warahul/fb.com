@@ -1,4 +1,6 @@
-Welcome {{sender}},{{reciever}}
+Welcome {{sender}},{{receiver}},{{user_msg}}
+<br>
+{{user_msg.0}}
 <br>
 Who do you want to chat with:
 <form action="{% url 'messenger:chooseuser' %}" method="post">
@@ -9,6 +11,4 @@ Who do you want to chat with:
         <br><br>
         <button type="submit">ok</button>
     </div>
-
 </form>
-
