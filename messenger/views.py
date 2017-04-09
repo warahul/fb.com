@@ -37,11 +37,13 @@ def sendMesg(request):
     auth_user = None
     if request.user.is_authenticated():
         auth_user = request.user
-    
+
     print(auth_user.msgList.all())
-    user_msg=Messeges.objects.filter(users__in=[auth_user,User.objects.get(username=username)])[0]
+    user_msg=Messeges.objects.filter(users=auth_user).filter(users=User.objects.get(username=username))[0]
+    print(user_msg);
     if user_msg:
         user_msg.messege=user_msg.messege+","+messege
+        user_msg.save()
     print(" printing users msg ")
     print (user_msg)
     if not user_msg :
@@ -49,5 +51,5 @@ def sendMesg(request):
         msg.save()
         msg.users.add(auth_user)
         msg.users.add(User.objects.get(username=username))
-        #auth_user.msgList
+
     return render(request,'messenger/home.html',{'user':auth_user})
