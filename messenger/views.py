@@ -9,7 +9,7 @@ from django.urls import reverse
 from django.core.exceptions import ObjectDoesNotExist
 from django.contrib.auth.models import User, Group
 from django.contrib.auth import authenticate, login
-
+import string
 # Create your views here.
 def index(request):
     return render(request, 'messenger/login.html')
@@ -31,25 +31,33 @@ def Sitelogin(request):
         return render(request,'messenger/login.html',{'error':error})
 
 def sendMesg(request):
-    messege=request.POST['messege']
-    username=request.POST['username']
-    print (messege, username)
+    new_messege=request.POST['messege']
+    usernames=request.POST['username']
+    print (new_messege, usernames)
     auth_user = None
     if request.user.is_authenticated():
         auth_user = request.user
 
-    print(auth_user.msgList.all())
-    user_msg=Messeges.objects.filter(users=auth_user).filter(users=User.objects.get(username=username))[0]
+
+    user_msg=Messeges.objects.filter(users=auth_user)
+    for user in usernames.split(','):
+        print (user,user_msg)
+        user_msg=user_msg.filter(users=User.objects.get(username=user))
+    if user_msg :
+        user_msg=user_msg[0]
+
     print(user_msg);
     if user_msg:
-        user_msg.messege=user_msg.messege+","+messege
+        user_msg.messege=user_msg.messege+'\0'+auth_user.username+'\1'+new_messege
         user_msg.save()
     print(" printing users msg ")
     print (user_msg)
     if not user_msg :
-        msg=Messeges(messege=messege)
+        msg=Messeges(messege=auth_user.username+'\1'+new_messege)
         msg.save()
         msg.users.add(auth_user)
-        msg.users.add(User.objects.get(username=username))
+        for user in usernames.split(','):
+            msg.users.add(User.objects.get(username=user))
 
     return render(request,'messenger/home.html',{'user':auth_user})
+
