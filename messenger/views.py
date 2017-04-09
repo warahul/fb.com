@@ -9,7 +9,7 @@ from django.urls import reverse
 from django.core.exceptions import ObjectDoesNotExist
 from django.contrib.auth.models import User, Group
 from django.contrib.auth import authenticate, login
-
+import string
 # Create your views here.
 def index(request):
     return render(request, 'messenger/login.html')
@@ -30,6 +30,7 @@ def Sitelogin(request):
         error="Incorrect Username/Password"
         return render(request,'messenger/login.html',{'error':error})
 
+
 def chooseuser(request):
     username = request.POST['username']
     print username, 'in chooseuser'
@@ -38,10 +39,15 @@ def chooseuser(request):
     auth_user = request.user
     user_msg = Messeges.objects.filter(users=auth_user).filter(users=User.objects.get(username=username))[0]
     print str(user_msg.messege)
-    import ast
-    print ast.literal_eval(str(user_msg.messege))
-    print dir(user_msg)
-    return render(request,'messenger/chat.html',{'sender':auth_user,'receiver':username,'user_msg':user_msg})
+    list1 = str(user_msg.messege).split('\0')
+    list2 = [0] * len(list1)
+    for i in range(0,len(list1)):
+		newlist = list1[i].split('\1')
+		print newlist
+		list2[i] = newlist[0]
+		list1[i] = newlist[1]
+    mylist=zip(list1,list2)
+    return render(request,'messenger/chat.html',{'sender':auth_user,'receiver':username,'mylist':mylist})
     #user_msg=Messeges.objects.filter(users__in=[auth_user,User.objects.get(username=username)])[0]
     #if user_msg:
     #    user_msg.messege=user_msg.messege+","+messege
@@ -72,3 +78,35 @@ def chooseuser(request):
     #    msg.users.add(User.objects.get(username=username))
 
     #return render(request,'messenger/home.html',{'user':auth_user})
+
+def sendMesg(request):
+    new_messege=request.POST['messege']
+    usernames=request.POST['username']
+    print (new_messege, usernames)
+    auth_user = None
+    if request.user.is_authenticated():
+        auth_user = request.user
+
+
+    user_msg=Messeges.objects.filter(users=auth_user)
+    for user in usernames.split(','):
+        print (user,user_msg)
+        user_msg=user_msg.filter(users=User.objects.get(username=user))
+    if user_msg :
+        user_msg=user_msg[0]
+
+    print(user_msg);
+    if user_msg:
+        user_msg.messege=user_msg.messege+'\0'+auth_user.username+'\1'+new_messege
+        user_msg.save()
+    print(" printing users msg ")
+    print (user_msg)
+    if not user_msg :
+        msg=Messeges(messege=auth_user.username+'\1'+new_messege)
+        msg.save()
+        msg.users.add(auth_user)
+        for user in usernames.split(','):
+            msg.users.add(User.objects.get(username=user))
+
+    return render(request,'messenger/home.html',{'user':auth_user})
+
