@@ -1,16 +1,13 @@
 Welcome {{user.username}},
 <br>
 Who do you want to chat with:
-<form action="{% url 'messenger:sendMesg' %}" method="post">
+<form action="{% url 'messenger:chooseuser' %}" method="post">
     {% csrf_token %}
     <div class="container">
         <label><b>Username</b></label>
         <input type="text" placeholder="Enter User To send Messege" name="username" required>
         <br><br>
-        <label><b>Messege</b></label>
-        <input type="textarea" cols="40" rows="5" placeholder="Enter Messege" name="messege" required>
-
-        <button type="submit">Send</button>
+        <button type="submit">ok</button>
     </div>
 
 </form>

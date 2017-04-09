@@ -1,0 +1,34 @@
+
+    <script type="text/javascript">
+    	function send_msg(){
+    		alert("pabhi")
+    		$.ajax({
+    			type: "POST",
+    			url: "sendMesg",
+    			data:{'message':document.getElementById("Message").value,'sender':{{sender}},'receiver':{{receiver}}},
+    			async:true
+    		});
+    	}
+    </script>
+
+
+Welcome {{sender}},{{receiver}},{{mylist}}
+<div id="prevMessege">
+</div>
+
+<div id="current">
+{% for ab in mylist %}
+	<bold>{{ab.1}}:</bold>
+    {{ab.0}}<br><br>
+    
+{% endfor %}
+</div>
+
+<div id="newMessge">
+</div>
+
+    <div class="container">
+        <input type="text" placeholder="Enter Messege" id="Message" name="Messege" required>
+        <br><br>
+        <button id="send_msg" onclick="send_msg()">Send</button>
+    </div>

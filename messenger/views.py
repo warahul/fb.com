@@ -30,6 +30,55 @@ def Sitelogin(request):
         error="Incorrect Username/Password"
         return render(request,'messenger/login.html',{'error':error})
 
+
+def chooseuser(request):
+    username = request.POST['username']
+    print username, 'in chooseuser'
+    auth_user = None
+    #if request.user.is_authenticated():
+    auth_user = request.user
+    user_msg = Messeges.objects.filter(users=auth_user).filter(users=User.objects.get(username=username))[0]
+    print str(user_msg.messege)
+    list1 = str(user_msg.messege).split('\0')
+    list2 = [0] * len(list1)
+    for i in range(0,len(list1)):
+		newlist = list1[i].split('\1')
+		print newlist
+		list2[i] = newlist[0]
+		list1[i] = newlist[1]
+    mylist=zip(list1,list2)
+    return render(request,'messenger/chat.html',{'sender':auth_user,'receiver':username,'mylist':mylist})
+    #user_msg=Messeges.objects.filter(users__in=[auth_user,User.objects.get(username=username)])[0]
+    #if user_msg:
+    #    user_msg.messege=user_msg.messege+","+messege
+    #print(" printing users msg ")
+    #print (user_msg)
+    #if not user_msg :
+    #    msg=Messeges(messege=messege)
+    #    msg.save()
+    #    msg.users.add(auth_user)
+    #    msg.users.add(User.objects.get(username=username))
+        #auth_user.msgList
+    #return render(request,'messenger/home.html',{'user':auth_user})
+    #if request.user.is_authenticated():
+    #    auth_user = request.user
+
+    #print(auth_user.msgList.all())
+    #user_msg=Messeges.objects.filter(users=auth_user).filter(users=User.objects.get(username=username))[0]
+    #print(user_msg);
+    #if user_msg:
+    #    user_msg.messege=user_msg.messege+","+messege
+    #    user_msg.save()
+    #print(" printing users msg ")
+    #print (user_msg)
+    #if not user_msg :
+    #    msg=Messeges(messege=messege)
+    #    msg.save()
+    #    msg.users.add(auth_user)
+    #    msg.users.add(User.objects.get(username=username))
+
+    #return render(request,'messenger/home.html',{'user':auth_user})
+
 def sendMesg(request):
     new_messege=request.POST['messege']
     sender=request.POST['sender']
