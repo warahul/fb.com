@@ -9,7 +9,7 @@ from django.urls import reverse
 from django.core.exceptions import ObjectDoesNotExist
 from django.contrib.auth.models import User, Group
 from django.contrib.auth import authenticate, login
-import string
+import string, json
 # Create your views here.
 def index(request):
     return render(request, 'messenger/login.html')
@@ -32,57 +32,45 @@ def Sitelogin(request):
 
 
 def chooseuser(request):
-    username = request.POST['username']
-    print username, 'in chooseuser'
+    usernames = request.POST['username']
+    print (usernames, 'in chooseuser')
     auth_user = None
     #if request.user.is_authenticated():
     auth_user = request.user
-    user_msg = Messeges.objects.filter(users=auth_user).filter(users=User.objects.get(username=username))[0]
-    print str(user_msg.messege)
-    list1 = str(user_msg.messege).split('\0')
-    list2 = [0] * len(list1)
-    for i in range(0,len(list1)):
-		newlist = list1[i].split('\1')
-		print newlist
-		list2[i] = newlist[0]
-		list1[i] = newlist[1]
-    mylist=zip(list1,list2)
-    return render(request,'messenger/chat.html',{'sender':auth_user,'receiver':username,'mylist':mylist})
-    #user_msg=Messeges.objects.filter(users__in=[auth_user,User.objects.get(username=username)])[0]
-    #if user_msg:
-    #    user_msg.messege=user_msg.messege+","+messege
-    #print(" printing users msg ")
-    #print (user_msg)
-    #if not user_msg :
-    #    msg=Messeges(messege=messege)
-    #    msg.save()
-    #    msg.users.add(auth_user)
-    #    msg.users.add(User.objects.get(username=username))
-        #auth_user.msgList
-    #return render(request,'messenger/home.html',{'user':auth_user})
-    #if request.user.is_authenticated():
-    #    auth_user = request.user
+    user_msg=Messeges.objects.filter(users=auth_user)
+    for user in usernames.split(','):
+        if user_msg:
+            user_msg=user_msg.filter(users=User.objects.get(username=user))
 
-    #print(auth_user.msgList.all())
-    #user_msg=Messeges.objects.filter(users=auth_user).filter(users=User.objects.get(username=username))[0]
-    #print(user_msg);
-    #if user_msg:
-    #    user_msg.messege=user_msg.messege+","+messege
-    #    user_msg.save()
-    #print(" printing users msg ")
-    #print (user_msg)
-    #if not user_msg :
-    #    msg=Messeges(messege=messege)
-    #    msg.save()
-    #    msg.users.add(auth_user)
-    #    msg.users.add(User.objects.get(username=username))
+    list1=[];
+    list2=[];
+    noMsgSent=0;
+    beginCount=0;
+    endCount=0;
+    if user_msg :
+        user_msg=user_msg[0]
+        list1 = str(user_msg.messege).split('\0')
+        list2 = [0] * len(list1)
+        if len(list1)>10 :
+            noMsgSent=10;
+        else:
+            noMsgSent=len(list1)
+        for i in range(len(list1)-noMsgSent,len(list1)):
+            newlist = list1[i].split('\1')
+            print (newlist)
+            list2[i] = newlist[0]
+            list1[i] = newlist[1]
+        beginCount=len(list1)-noMsgSent;
+        endCount=len(list1);
 
-    #return render(request,'messenger/home.html',{'user':auth_user})
+    mylist=zip(list1[-noMsgSent:],list2[-noMsgSent:])
+    return render(request,'messenger/chat.html',{'sender':auth_user,'receiver':usernames,'mylist':mylist,'beginCount':beginCount,'endCount':endCount})
+
 
 def sendMesg(request):
-    new_messege=request.POST['messege']
+    new_messege=request.POST['message']
     sender=request.POST['sender']
-    receivers=request.POST['receivers']
+    receivers=request.POST['receiver']
     print (new_messege, sender)
     # auth_user = None
     # if request.user.is_authenticated():
@@ -91,7 +79,8 @@ def sendMesg(request):
 
     user_msg=Messeges.objects.filter(users=auth_user)
     for user in receivers.split(','):
-        user_msg=user_msg.filter(users=User.objects.get(username=user))
+        if user_msg:
+            user_msg=user_msg.filter(users=User.objects.get(username=user))
 
     if user_msg :
         user_msg=user_msg[0]
@@ -99,11 +88,13 @@ def sendMesg(request):
     print(user_msg);
     if user_msg:
         user_msg.messege=user_msg.messege+'\0'+auth_user.username+'\1'+new_messege
+        user_msg.count+=1;
         user_msg.save()
     print(" printing users msg ")
     print (user_msg)
     if not user_msg :
         msg=Messeges(messege=auth_user.username+'\1'+new_messege)
+        msg.count=1;
         msg.save()
         msg.users.add(auth_user)
         for user in receivers.split(','):
@@ -113,34 +104,57 @@ def sendMesg(request):
 
 
 def getMsg(request):
-    usernames=request.POST['username']
-    msg_beginCount=request.POST['beginCount']
-    msg_endCount=request.POST['endCount']
-    prevMsg=request.POST['prevMsg']
-    auth_user = None
-    if request.user.is_authenticated():
-        auth_user = request.user
+    usernames=request.GET['username']
+    msg_beginCount=int(request.GET['beginCount'])
+    msg_endCount=int(request.GET['endCount'])
+    prevMsg=int(request.GET['prevMsg'])
+    # auth_user = None
+    # if request.user.is_authenticated():
+    auth_user = request.user
 
-
+    print(usernames)
     user_msg=Messeges.objects.filter(users=auth_user)
     for user in usernames.split(','):
-        user_msg=user_msg.filter(users=User.objects.get(username=user))
-
+        if user_msg:
+            user_msg=user_msg.filter(users=User.objects.get(username=user))
+    list1=[];
+    list2=[];
+    noPrevMsg=0;
+    newMsg=0;
+    stringToPass="";
     if user_msg:
         user_msg=user_msg[0]
-        user_msg=str(user_msg.messege).split('\0')
-        if prevMsg:
-            noPrevMsg=0;
+        list1=str(user_msg.messege).split('\0')
+        print(len(list1))
+        if prevMsg ==1:
             print("in prevMsg")
             if msg_beginCount>10:
                 noPrevMsg=10;
             else:
                 noPrevMsg=msg_beginCount;
-            split_msg=str(user_msg[msg_beginCount-noPrevMsg:msg_beginCount]).split('\1')
-            return render(request,'messenger/chat.html',{'prev_msg_author':split_msg[0],'prev_msg_content':split_msg[1]})
+
+            for i in range(msg_beginCount-noPrevMsg,msg_beginCount):
+                newlist = list1[i].split('\1')
+                print (newlist)
+                stringToPass+="<b>"+newlist[0]+":</b>  "+newlist[1]+"<br><br>";
+
+            stringToPass+="<script>beginCount="+str(msg_beginCount-noPrevMsg)+";</script>"
+            return HttpResponse(stringToPass)
         else:
-            if(len(user_msg) > msg_endCount):
-                split_msg=str(user_msg[:len(user_msg) - msg_endCount]).split('\1')
-                return render(request,'messenger/chat.html',{'new_msg_author':split_msg[0],'new_msg_content':split_msg[1]})
+            print(len(list1),msg_endCount)
+            if(len(list1) > msg_endCount):
+                newMsg=len(list1)-msg_endCount;
+
+                for i in range(msg_endCount,msg_endCount+newMsg):
+                    print (i,newMsg)
+                    newlist = list1[i].split('\1')
+                    print (newlist)
+                    stringToPass+="<b>"+newlist[0]+":</b>  "+newlist[1]+"<br><br>";
+
+                stringToPass+="<script>endCount="+str(msg_endCount+newMsg)+";</script>"
+                print(stringToPass,"hellokkkk")
+                return HttpResponse(stringToPass)
+            else:
+                return HttpResponse("")
     else:
         return render(request,'messenger/chat.html')
