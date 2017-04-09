@@ -32,17 +32,18 @@ def Sitelogin(request):
 
 def sendMesg(request):
     new_messege=request.POST['messege']
-    usernames=request.POST['username']
-    print (new_messege, usernames)
-    auth_user = None
-    if request.user.is_authenticated():
-        auth_user = request.user
+    sender=request.POST['sender']
+    receivers=request.POST['receivers']
+    print (new_messege, sender)
+    # auth_user = None
+    # if request.user.is_authenticated():
+    auth_user = request.user
 
 
     user_msg=Messeges.objects.filter(users=auth_user)
-    for user in usernames.split(','):
-        print (user,user_msg)
+    for user in receivers.split(','):
         user_msg=user_msg.filter(users=User.objects.get(username=user))
+
     if user_msg :
         user_msg=user_msg[0]
 
@@ -56,8 +57,41 @@ def sendMesg(request):
         msg=Messeges(messege=auth_user.username+'\1'+new_messege)
         msg.save()
         msg.users.add(auth_user)
-        for user in usernames.split(','):
+        for user in receivers.split(','):
             msg.users.add(User.objects.get(username=user))
 
     return render(request,'messenger/home.html',{'user':auth_user})
 
+
+def getMsg(request):
+    usernames=request.POST['username']
+    msg_beginCount=request.POST['beginCount']
+    msg_endCount=request.POST['endCount']
+    prevMsg=request.POST['prevMsg']
+    auth_user = None
+    if request.user.is_authenticated():
+        auth_user = request.user
+
+
+    user_msg=Messeges.objects.filter(users=auth_user)
+    for user in usernames.split(','):
+        user_msg=user_msg.filter(users=User.objects.get(username=user))
+
+    if user_msg:
+        user_msg=user_msg[0]
+        user_msg=str(user_msg.messege).split('\0')
+        if prevMsg:
+            noPrevMsg=0;
+            print("in prevMsg")
+            if msg_beginCount>10:
+                noPrevMsg=10;
+            else:
+                noPrevMsg=msg_beginCount;
+            split_msg=str(user_msg[msg_beginCount-noPrevMsg:msg_beginCount]).split('\1')
+            return render(request,'messenger/chat.html',{'prev_msg_author':split_msg[0],'prev_msg_content':split_msg[1]})
+        else:
+            if(len(user_msg) > msg_endCount):
+                split_msg=str(user_msg[:len(user_msg) - msg_endCount]).split('\1')
+                return render(request,'messenger/chat.html',{'new_msg_author':split_msg[0],'new_msg_content':split_msg[1]})
+    else:
+        return render(request,'messenger/chat.html')

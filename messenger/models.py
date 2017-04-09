@@ -8,7 +8,7 @@ import json
 # Create your models here.
 
 class Messeges(models.Model):
-        messege= models.TextField(blank=True,default='[]')
+        messege= models.TextField(blank=True,default='')
         users= models.ManyToManyField(User,related_name="msgList")
         def __str__(self):              # __unicode__ on Python 2
                 return self.messege
