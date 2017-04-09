@@ -30,24 +30,21 @@ def Sitelogin(request):
         error="Incorrect Username/Password"
         return render(request,'messenger/login.html',{'error':error})
 
-def sendMesg(request):
-    messege=request.POST['messege']
-    username=request.POST['username']
-    print (messege, username)
+def chooseuser(request):
+    username = request.POST['username']
     auth_user = None
-    if request.user.is_authenticated():
-        auth_user = request.user
-    
-    print(auth_user.msgList.all())
-    user_msg=Messeges.objects.filter(users__in=[auth_user,User.objects.get(username=username)])[0]
-    if user_msg:
-        user_msg.messege=user_msg.messege+","+messege
-    print(" printing users msg ")
-    print (user_msg)
-    if not user_msg :
-        msg=Messeges(messege=messege)
-        msg.save()
-        msg.users.add(auth_user)
-        msg.users.add(User.objects.get(username=username))
+    #if request.user.is_authenticated():
+    auth_user = request.user
+    return render(request,'messenger/chat.html',{'sender':auth_user,'receiver':username})
+    #user_msg=Messeges.objects.filter(users__in=[auth_user,User.objects.get(username=username)])[0]
+    #if user_msg:
+    #    user_msg.messege=user_msg.messege+","+messege
+    #print(" printing users msg ")
+    #print (user_msg)
+    #if not user_msg :
+    #    msg=Messeges(messege=messege)
+    #    msg.save()
+    #    msg.users.add(auth_user)
+    #    msg.users.add(User.objects.get(username=username))
         #auth_user.msgList
-    return render(request,'messenger/home.html',{'user':auth_user})
+    #return render(request,'messenger/home.html',{'user':auth_user})
