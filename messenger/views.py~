@@ -81,8 +81,8 @@ def openchat(request):
     usernames = ''
     for user in all_users:
 	if user!=auth_user:
-		usernames = usernames + str(user) + ","
-    print usernames
+		usernames = usernames + user + ","
+    print auth_user
     list1=[];
     list2=[];
     noMsgSent=0;

@@ -1,0 +1,9 @@
+{%for option,id in zip%}
+{{option}}
+<form action="{% url 'messenger:openchat' %}" method="post">
+<button>Choose</button>
+<input type="hidden" name="hidden" value={{id}}>
+</form>
+<br>
+<br>
+{%endfor%}

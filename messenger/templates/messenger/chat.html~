@@ -21,7 +21,7 @@
 
     		 $.ajax({
     			type: "POST",
-    			url: "sendMesg/",
+    			url: "sendMesg",
     			data:{'message':document.getElementById("Message").value,'sender':"{{sender}}",'receiver':"{{receiver}}"},
     			async:true
     		 });
