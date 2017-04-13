@@ -125,9 +125,34 @@ def bringusers(request):
 def open_newchat(request):
     auth_user = request.user
     usernames = request.POST['reciever']
-    mylist=zip([],[])
-    
-    return HttpResponse('')
+    user_msg = Messeges.objects.filter(users=auth_user)
+    for user in usernames.split(','):
+        if user_msg:
+            user_msg=user_msg.filter(users=User.objects.get(username=user))
+    list1=[];
+    list2=[];
+    noMsgSent=0;
+    beginCount=0;
+    endCount=0;
+    print dir(user_msg)
+    if user_msg :
+        list1 = str(user_msg.messege).split('\0')
+        list2 = [0] * len(list1)
+        if len(list1)>10 :
+            noMsgSent=10;
+        else:
+            noMsgSent=len(list1)
+        for i in range(len(list1)-noMsgSent,len(list1)):
+            newlist = list1[i].split('\1')
+            print (newlist)
+            list2[i] = newlist[0]
+            list1[i] = newlist[1]
+        beginCount=len(list1)-noMsgSent;
+        endCount=len(list1);
+        
+    mylist=zip(list1[-noMsgSent:],list2[-noMsgSent:])
+    return render(request,'messenger/chat.html',{'sender':auth_user,'receiver':usernames,'mylist':mylist,'beginCount':beginCount,'endCount':endCount})
+
 
 def sendMesg(request):
     new_messege=request.POST['message']
