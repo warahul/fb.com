@@ -102,19 +102,29 @@ def openchat(request):
         all_users=user_msg.users.all()
         count=user_msg.count
         x=user_seen
+        tmp=len(x)
+        print(tmp)
+        print(all_users)
+        print(x[0].users.all())
         for j in range(0,len(all_users)):
             x=x.filter(users=all_users[j])
         tmp=len(x)
+        print(tmp)
         for j in range(0,tmp):
             tmpusers=x[j].users.all()
+            print(tmpusers)
+            print(all_users)
             flag=0
             for user in tmpusers:
                 if (user not in all_users):
                     flag=1
                     break
             if (flag==0):
+                print("successly got seen")
                 x=x[j]
                 break
+        print(len(list1))
+        print(x.count)
         if len(list1)>10 :
             if (len(list1)-x.count<10):
                 noMsgSent=10;
@@ -123,6 +133,8 @@ def openchat(request):
         else:
             noMsgSent=len(list1)
         x.count=len(list1)
+        print(x.count)
+        x.save()
         for i in range(len(list1)-noMsgSent,len(list1)):
             newlist = list1[i].split('\1')
             print (newlist)
@@ -142,7 +154,6 @@ def bringusers(request):
 	for user in users:
 		if user == request.user:
 			continue
-		html ='' 
 		html = html + '<input type="radio" name="choose" value="'+user.username+'">'+user.username+'<br>'
 	if html!='':	
 		return HttpResponse(html + '<button onclick="addusers()" type="button">Add</button>')
@@ -162,8 +173,23 @@ def open_newchat(request):
     beginCount=0;
     endCount=0;
     if user_msg :
-        user_msg = user_msg[0]
-    user_msg = user_msg[0]
+        tmp=len(user_msg)
+        for j in range(0,tmp):
+            tmpusers=user_msg[j].users.all()
+            print(tmpusers)
+            print(auth_user)
+            flag=0
+            for user in tmpusers:
+                for names in username.split(','):
+                    if (user==User.objects.get(username=names) or user==auth_user):
+                        print(user)
+                        print("shit")
+                        flag=1
+                        break
+            if (flag==1):
+                print("done")
+                user_msg=user_msg[j]
+                break
     if user_msg :
         list1 = str(user_msg.messege).split('\0')
         list2 = [0] * len(list1)
@@ -221,6 +247,27 @@ def sendMesg(request):
         user_msg.messege=user_msg.messege+'\0'+auth_user.username+'\1'+new_messege
         user_msg.count+=1;
         user_msg.save()
+        user_seen=Seen.objects.filter(curr_user=auth_user)
+        all_users=user_msg.users.all()
+        count=user_msg.count
+        x=user_seen
+        for j in range(0,len(all_users)):
+            x=x.filter(users=all_users[j])
+        # print(x)
+        # x=x[0]
+        tmp=len(x)
+        for j in range(0,tmp):
+            tmpusers=x[j].users.all()
+            flag=0
+            for user in tmpusers:
+                if (user not in all_users):
+                    flag=1
+                    break
+            if (flag==0):
+                x=x[j]
+                break
+        x.count=count
+        x.save()
     print(" printing users msg ")
     print (user_msg)
     if not user_msg :
@@ -238,14 +285,13 @@ def sendMesg(request):
         for user in receivers.split(','):
             seen.users.add(User.objects.get(username=user))
         for user in receivers.split(','):
-            if (user==auth_user.username):
-                continue
             seen=Seen()
             seen.curr_user=User.objects.get(username=user)            
             seen.count=0
             seen.save()
             for user1 in receivers.split(','):
                 seen.users.add(User.objects.get(username=user1))
+            seen.users.add(auth_user)
     return render(request,'messenger/home.html',{'user':auth_user})
 
 
@@ -372,6 +418,8 @@ def Getnotseen(request):
                 break
         if (x.count!=count):
             list1.append((user_msg[i],x.count))
+            x.count=user_msg[i].count
+            x.save()
     print("end shit")
     print(list1)
     return list1

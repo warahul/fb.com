@@ -15,7 +15,7 @@ $.ajax({
 }
 function addusers(){
 var existing = $("#reciever").val();
-var newi = $('[name="choose"]').val();
+var newi = $('input[name=choose]:checked').val();
 if (existing == ""){
 	$("#reciever_div").html(newi);
 	$("#reciever").val( newi );
