@@ -19,17 +19,23 @@ def results(request,response):
                 return HttpResponse(str(response))
 
 def Sitelogin(request):
-    p_username = request.POST['username']
-    p_password = request.POST['password']
+    if request.method =="POST":
+        p_username = request.POST['username']
+        p_password = request.POST['password']
 
-    user = authenticate(username=p_username, password=p_password)
+        user = authenticate(username=p_username, password=p_password)
 
-    if user is not None:
-        login(request, user)
-        return render(request,'messenger/home.html',{'user':user})
+        if user is not None:
+            login(request, user)
+            return render(request,'messenger/home.html',{'user':user})
+        else:
+            error="Incorrect Username/Password"
+            return render(request,'messenger/login.html',{'error':error})
     else:
-        error="Incorrect Username/Password"
-        return render(request,'messenger/login.html',{'error':error})
+        if request.user.is_authenticated():
+            return render(request,'messenger/home.html')
+        else:
+            return render(request,'messenger/login.html')
 
 
 def chooseuser(request):
@@ -157,6 +163,8 @@ def open_newchat(request):
     endCount=0;
     if user_msg :
         user_msg = user_msg[0]
+    user_msg = user_msg[0]
+    if user_msg :
         list1 = str(user_msg.messege).split('\0')
         list2 = [0] * len(list1)
         if len(list1)>10 :
@@ -363,7 +371,7 @@ def Getnotseen(request):
                 x=x[j]
                 break
         if (x.count!=count):
-            list1.append(user_msg[i])
+            list1.append((user_msg[i],x.count))
     print("end shit")
     print(list1)
     return list1

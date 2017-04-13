@@ -20,7 +20,7 @@ if (existing == ""){
 	$("#reciever_div").html(newi);
 	$("#reciever").val( newi );
 }
-else if (existing.indexOf(newi) >= 0){
+else if (existing.indexOf(newi) < 0){
 	$("#reciever_div").html( $("#reciever_div").html() + ',' + newi );
 	$("#reciever").val( $("#reciever_div").html() + ',' + newi );
 }
