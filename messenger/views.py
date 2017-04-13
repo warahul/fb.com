@@ -92,10 +92,31 @@ def openchat(request):
     if user_msg :
         list1 = str(user_msg.messege).split('\0')
         list2 = [0] * len(list1)
+        user_seen=Seen.objects.filter(curr_user=auth_user)
+        all_users=user_msg.users.all()
+        count=user_msg.count
+        x=user_seen
+        for j in range(0,len(all_users)):
+            x=x.filter(users=all_users[j])
+        tmp=len(x)
+        for j in range(0,tmp):
+            tmpusers=x[i].users.all()
+            flag=0
+            for user in tmpusers:
+                if (user not in all_users):
+                    flag=1
+                    break
+            if (flag==0):
+                x=x[j]
+                break
         if len(list1)>10 :
-            noMsgSent=10;
+            if (len(list1)-x.count<10):
+                noMsgSent=10;
+            else:
+                noMsgSent=len(list1)-x.count;
         else:
             noMsgSent=len(list1)
+        x.count=len(list1)
         for i in range(len(list1)-noMsgSent,len(list1)):
             newlist = list1[i].split('\1')
             print (newlist)
@@ -146,7 +167,17 @@ def sendMesg(request):
             user_msg=user_msg.filter(users=User.objects.get(username=user))
 
     if user_msg :
-        user_msg=user_msg[0]
+        tmp=len(user_msg)
+        for j in range(0,tmp):
+            tmpusers=user_msg[j].users.all()
+            flag=0
+            for user in tmpusers:
+                if (user not in usernames.split(',')):
+                    flag=1
+                    break
+            if (flag==0):
+                user_msg=user_msg[j]
+                break
     # Getnotseen(request)
     print(user_msg);
     if user_msg:
@@ -189,7 +220,6 @@ def getMsg(request):
     # auth_user = None
     # if request.user.is_authenticated():
     auth_user = request.user
-
     print(usernames)
     user_msg=Messeges.objects.filter(users=auth_user)
     for user in usernames.split(','):
@@ -201,9 +231,37 @@ def getMsg(request):
     newMsg=0;
     stringToPass="";
     if user_msg:
-        user_msg=user_msg[0]
+        tmp=len(user_msg)
+        for j in range(0,tmp):
+            tmpusers=user_msg[j].users.all()
+            flag=0
+            for user in tmpusers:
+                if (user not in usernames.split(',')):
+                    flag=1
+                    break
+            if (flag==0):
+                user_msg=user_msg[j]
+                break
+        user_seen=Seen.objects.filter(curr_user=auth_user)
+        all_users=user_msg.users.all()
+        count=user_msg.count
+        x=user_seen
+        for j in range(0,len(all_users)):
+            x=x.filter(users=all_users[j])
+        tmp=len(x)
+        for j in range(0,tmp):
+            tmpusers=x[i].users.all()
+            flag=0
+            for user in tmpusers:
+                if (user not in all_users):
+                    flag=1
+                    break
+            if (flag==0):
+                x=x[j]
+                break
         list1=str(user_msg.messege).split('\0')
         print(len(list1))
+        x.count=len(list1)
         if prevMsg ==1:
             print("in prevMsg")
             if msg_beginCount>10:
@@ -259,7 +317,7 @@ def Getnotseen(request):
         # x=x[0]
         tmp=len(x)
         for j in range(0,tmp):
-            tmpusers=x[i].users.all()
+            tmpusers=x[j].users.all()
             flag=0
             for user in tmpusers:
                 if (user not in all_users):
