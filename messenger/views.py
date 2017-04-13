@@ -107,6 +107,29 @@ def openchat(request):
     mylist=zip(list1[-noMsgSent:],list2[-noMsgSent:])
     return render(request,'messenger/chat.html',{'sender':auth_user,'receiver':usernames[:-1],'mylist':mylist,'beginCount':beginCount,'endCount':endCount})
 
+def bringusers(request):
+	username = request.GET['username']
+	print (username)
+	users = User.objects.filter(username__startswith=username)
+	html = ''
+	for user in users:
+		if user == request.user:
+			continue
+		html ='' 
+		html = html + '<input type="radio" name="choose" value="'+user.username+'">'+user.username+'<br>'
+	if html!='':	
+		return HttpResponse(html + '<button onclick="addusers()" type="button">Add</button>')
+	else:
+		return HttpResponse('No users found')
+
+def open_newchat(request):
+    auth_user = request.user
+    usernames = request.POST['reciever']
+    mylist=zip([],[])
+    beginCount=0;
+    endCount=0;
+    return render(request,'messenger/chat.html',{'sender':auth_user,'receiver':usernames,'mylist':mylist,'beginCount':beginCount,'endCount':endCount})
+
 
 def sendMesg(request):
     new_messege=request.POST['message']
