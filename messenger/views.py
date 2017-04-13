@@ -100,7 +100,7 @@ def openchat(request):
             x=x.filter(users=all_users[j])
         tmp=len(x)
         for j in range(0,tmp):
-            tmpusers=x[i].users.all()
+            tmpusers=x[j].users.all()
             flag=0
             for user in tmpusers:
                 if (user not in all_users):
@@ -146,11 +146,33 @@ def bringusers(request):
 def open_newchat(request):
     auth_user = request.user
     usernames = request.POST['reciever']
-    mylist=zip([],[])
+    user_msg = Messeges.objects.filter(users=auth_user)
+    for user in usernames.split(','):
+        if user_msg:
+            user_msg=user_msg.filter(users=User.objects.get(username=user))
+    list1=[];
+    list2=[];
+    noMsgSent=0;
     beginCount=0;
     endCount=0;
+    if user_msg :
+        user_msg = user_msg[0]
+        list1 = str(user_msg.messege).split('\0')
+        list2 = [0] * len(list1)
+        if len(list1)>10 :
+            noMsgSent=10;
+        else:
+            noMsgSent=len(list1)
+        for i in range(len(list1)-noMsgSent,len(list1)):
+            newlist = list1[i].split('\1')
+            print (newlist)
+            list2[i] = newlist[0]
+            list1[i] = newlist[1]
+        beginCount=len(list1)-noMsgSent;
+        endCount=len(list1);
+        
+    mylist=zip(list1[-noMsgSent:],list2[-noMsgSent:])
     return render(request,'messenger/chat.html',{'sender':auth_user,'receiver':usernames,'mylist':mylist,'beginCount':beginCount,'endCount':endCount})
-
 
 def sendMesg(request):
     new_messege=request.POST['message']
@@ -170,14 +192,21 @@ def sendMesg(request):
         tmp=len(user_msg)
         for j in range(0,tmp):
             tmpusers=user_msg[j].users.all()
+            print(tmpusers)
+            print(auth_user)
             flag=0
             for user in tmpusers:
-                if (user not in usernames.split(',')):
-                    flag=1
-                    break
-            if (flag==0):
+                for names in receivers.split(','):
+                    if (user==User.objects.get(username=names) or user==auth_user):
+                        print(user)
+                        print("shit")
+                        flag=1
+                        break
+            if (flag==1):
+                print("done")
                 user_msg=user_msg[j]
                 break
+
     # Getnotseen(request)
     print(user_msg);
     if user_msg:
@@ -234,12 +263,19 @@ def getMsg(request):
         tmp=len(user_msg)
         for j in range(0,tmp):
             tmpusers=user_msg[j].users.all()
+            print(tmpusers)
+            print(usernames.split(','))
+            print(auth_user)
             flag=0
             for user in tmpusers:
-                if (user not in usernames.split(',')):
-                    flag=1
-                    break
-            if (flag==0):
+                for names in usernames.split(','):
+                    if (user==User.objects.get(username=names) or user==auth_user):
+                        print(user)
+                        print("shit")
+                        flag=1
+                        break
+            if (flag==1):
+                print("done")
                 user_msg=user_msg[j]
                 break
         user_seen=Seen.objects.filter(curr_user=auth_user)
@@ -250,7 +286,7 @@ def getMsg(request):
             x=x.filter(users=all_users[j])
         tmp=len(x)
         for j in range(0,tmp):
-            tmpusers=x[i].users.all()
+            tmpusers=x[j].users.all()
             flag=0
             for user in tmpusers:
                 if (user not in all_users):
@@ -293,7 +329,7 @@ def getMsg(request):
             else:
                 return HttpResponse("")
     else:
-        return render(request,'messenger/chat.html')
+        return HttpResponse("")
 
 def Getnotseen(request):
     auth_user = request.user
