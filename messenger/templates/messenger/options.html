@@ -2,7 +2,7 @@
     {% csrf_token %}
 {%for option,id in zip%}
 
-<input type="radio" name="id-value" value={{id}} > {{option}}<br>
+<input type="radio" name="id-value" value={{id}} required> {{option}}<br>
 
 {%endfor%}
 <input type="submit" value="Open Chat">

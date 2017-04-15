@@ -62,8 +62,12 @@ def chooseuser(request):
     user_msgs = Messeges.objects.filter(users=auth_user).filter(users__username__startswith=usernames)
     options = []
     ids = []
+    usernames=""
     for user_msg in user_msgs:
-        options.append(user_msg.users.all())
+        for user in all_users:
+            if user!=auth_user:
+                usernames = usernames + str(user) + ","
+        options.append(usernames)
         ids.append(user_msg.id)
     #print '@@@',dir(user_msg[0]),user_msg[0].id,user_msg[0].users.all(),user_msg[0].messege
     #for user in usernames.split(','):
@@ -170,7 +174,7 @@ def bringusers(request):
 	for user in users:
 		if user == request.user:
 			continue
-		html = html + '<input type="radio" name="choose" value="'+user.username+'">'+user.username+'<br>'
+		html = html + '<input type="radio" name="choose" value="'+user.username+'" required>'+user.username+'<br>'
 	if html!='':	
 		return HttpResponse(html + '<button onclick="addusers()" type="button">Add</button>')
 	else:
@@ -446,7 +450,7 @@ def Getnotseen(request):
             for user in all_users:
                 if user!=auth_user:
                     usernames = usernames + str(user) + ","
-            stringToPass+='<input type="radio" name="id-value" value="'+str(list1[i][0].id)+'" >'+ usernames +'<br><hr>'
+            stringToPass+='<input type="radio" name="id-value" value="'+str(list1[i][0].id)+'" required >'+ usernames +'<br><hr>'
     
 
     print("printing ss",stringToPass)
