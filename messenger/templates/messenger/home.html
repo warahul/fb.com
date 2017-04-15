@@ -53,6 +53,9 @@ $(document).ready(function() {
          success : function(text)
          {
              $("#notSeenDisplay").append(text)
+             if(text){
+                 document.getElementById("submitButton").style.display="block"
+             }
          }
      })
  }, 5000);
@@ -68,7 +71,7 @@ Welcome {{user.username}},
 
     </div>
 
-        <input type="submit" name="submitButton" value="Open Chat">
+        <input type="submit" id="submitButton" value="Open Chat" style="display:none">
 </form>
 
 
