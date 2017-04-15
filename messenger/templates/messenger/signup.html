@@ -1,0 +1,28 @@
+{% if info %}
+{{info}}
+{% endif %}
+Please Use, this link to <a href="{% url 'messenger:Sitelogin' %}"> Login </a> 
+
+<br>
+<hr>
+<br>
+
+{% block content %}
+<h2>Sign up</h2>
+
+<form action="{% url 'messenger:SignUp' %}" method="post">
+    {% csrf_token %}
+    <div class="container">
+        <label><b>Username:</b></label>
+        <input type="text" placeholder="Enter Username" name="username" required>
+
+        <label><b>Password:</b></label>
+        <input type="password" placeholder="Enter Password" name="password" required>
+
+        <button type="submit"><b>Sign Up</b></button>
+    </div>
+
+</form>
+
+
+{% endblock %}

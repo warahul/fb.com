@@ -19,18 +19,39 @@ def results(request,response):
                 return HttpResponse(str(response))
 
 def Sitelogin(request):
-    p_username = request.POST['username']
-    p_password = request.POST['password']
+    if request.method =="POST":
+        p_username = request.POST['username']
+        p_password = request.POST['password']
 
-    user = authenticate(username=p_username, password=p_password)
+        user = authenticate(username=p_username, password=p_password)
 
-    if user is not None:
-        login(request, user)
-        return render(request,'messenger/home.html',{'user':user})
+        if user is not None:
+            login(request, user)
+            return render(request,'messenger/home.html',{'user':user})
+        else:
+            error="Incorrect Username/Password"
+            return render(request,'messenger/login.html',{'error':error})
     else:
-        error="Incorrect Username/Password"
-        return render(request,'messenger/login.html',{'error':error})
+        if request.user.is_authenticated():
+            return render(request,'messenger/home.html')
+        else:
+            return render(request,'messenger/login.html')
 
+def SignUp(request):
+    if request.method == "POST":
+        p_username = request.POST['username']
+        p_password = request.POST['password']
+        try:
+            user= User.objects.get(username=p_username)
+            info="Username :"+ p_username+" Exists. "
+            return render(request,'messenger/signup.html',{'info':info})
+        except User.DoesNotExist:
+            info="Username :"+p_username+" successfully Create. "
+            User.objects.create_user(username=p_username,password=p_password)
+            return render(request,'messenger/signup.html',{'info':info})
+
+    else:
+        return render(request,'messenger/signup.html')
 
 def chooseuser(request):
     usernames = request.POST['username']
@@ -42,8 +63,8 @@ def chooseuser(request):
     options = []
     ids = []
     for user_msg in user_msgs:
-	options.append(user_msg.users.all())
-	ids.append(user_msg.id)
+        options.append(user_msg.users.all())
+        ids.append(user_msg.id)
     #print '@@@',dir(user_msg[0]),user_msg[0].id,user_msg[0].users.all(),user_msg[0].messege
     #for user in usernames.split(','):
     #    if user_msg:
@@ -81,9 +102,9 @@ def openchat(request):
     auth_user = request.user
     usernames = ''
     for user in all_users:
-	if user!=auth_user:
-		usernames = usernames + str(user) + ","
-    print usernames
+        if user!=auth_user:
+            usernames = usernames + str(user) + ","
+    print (usernames)
     list1=[];
     list2=[];
     noMsgSent=0;
@@ -269,7 +290,19 @@ def Getnotseen(request):
                 x=x[j]
                 break
         if (x.count!=count):
-            list1.append(user_msg[i])
+            list1.append((user_msg[i],x.count()))
     print("end shit")
-    print(list1)
-    return list1
+    print(list1[0][1])
+
+    stringToPass=""
+
+    for i in range(0,len(list1)):
+        list2=str(list1[i][0].messege).split('\0')
+        if (len(list2) > list1[i][1]):
+            stringToPass+=list1[i][0].users+"<br><hr>";
+            stringToPass+='<input type="submit" name="'+list1[i][0].id+'" value="Open Chat"/><br><hr>'
+    
+
+    print("printing ss",stringToPass)
+
+    return HttpResponse(stringToPass)

@@ -1,6 +1,11 @@
 <script src="{{STATIC_URL}}/static/jquery.min.js"></script>
 <script type="text/javascript">
-function bringusers(){
+
+
+
+
+
+ function bringusers(){
 alert($("#username").val())
 $.ajax({
      			   type: "GET",
@@ -35,10 +40,36 @@ $(document).ready(function() {
 			e.preventDefault(e);
 		}
             });
-        });
+ });
+
+
+ window.setInterval(function(){
+     $.ajax({
+     		 type: "GET",
+     		 url: "../Getnotseen",
+         data:{},
+     		 async:false,
+         success : function(text)
+         {
+             $("#notSeenDisplay").append(text)
+         }
+     })
+ }, 5000);
+
 </script>
+
 Welcome {{user.username}},
 <br>
+
+<form action="{% url 'messenger:openchat' %}" method="post">
+    {% csrf_token %}
+<div id="notSeenDisplay">
+
+</div>
+</form>
+
+
+<hr>
 Who do you want to chat with:
 <form action="{% url 'messenger:chooseuser' %}" method="post">
     {% csrf_token %}
