@@ -43,7 +43,7 @@ $(document).ready(function() {
             });
  });
 
-
+var globalhtml='';
  window.setInterval(function(){
      $.ajax({
      		 type: "GET",
@@ -52,8 +52,12 @@ $(document).ready(function() {
      		 async:false,
          success : function(text)
          {
-             $("#notSeenDisplay").append(text)
              if(text){
+                if (globalhtml.indexOf(text) < 0){
+                $("#notSeenDisplay").append(text);
+                globalhtml = globalhtml + text;   
+             }
+             
                  document.getElementById("submitButton").style.display="block"
              }
          }

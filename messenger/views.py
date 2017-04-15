@@ -32,10 +32,7 @@ def Sitelogin(request):
             error="Incorrect Username/Password"
             return render(request,'messenger/login.html',{'error':error})
     else:
-        if request.user.is_authenticated():
-            return render(request,'messenger/home.html')
-        else:
-            return render(request,'messenger/login.html')
+        return render(request,'messenger/login.html')
 
 def SignUp(request):
     if request.method == "POST":
@@ -64,7 +61,7 @@ def chooseuser(request):
     ids = []
     usernames=""
     for user_msg in user_msgs:
-        for user in all_users:
+        for user in user_msg.users.all():
             if user!=auth_user:
                 usernames = usernames + str(user) + ","
         options.append(usernames)
@@ -200,7 +197,7 @@ def open_newchat(request):
             print(auth_user)
             flag=0
             for user in tmpusers:
-                for names in username.split(','):
+                for names in usernames.split(','):
                     if (user==User.objects.get(username=names) or user==auth_user):
                         print(user)
                         print("shit")
@@ -438,9 +435,7 @@ def Getnotseen(request):
                 break
         if (x.count!=count):
             list1.append((user_msg[i],x.count))
-            x.count=user_msg[i].count
-            x.save()
-
+          
     print("end shit")
     stringToPass=""
     usernames=""
