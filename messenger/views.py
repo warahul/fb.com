@@ -96,7 +96,8 @@ def chooseuser(request):
     #return render(request,'messenger/chat.html',{'sender':auth_user,'receiver':usernames,'mylist':mylist,'beginCount':beginCount,'endCount':endCount})
 
 def openchat(request):
-    pid = request.POST['hidden']
+    print(request.POST['id-value'])
+    pid = int(request.POST['id-value'])
     user_msg = Messeges.objects.get(id=pid)
     all_users = user_msg.users.all()
     auth_user = request.user
@@ -437,15 +438,15 @@ def Getnotseen(request):
             x.save()
 
     print("end shit")
-    print(list1[0][1])
-
     stringToPass=""
-
+    usernames=""
     for i in range(0,len(list1)):
         list2=str(list1[i][0].messege).split('\0')
         if (len(list2) > list1[i][1]):
-            stringToPass+=list1[i][0].users+"<br><hr>";
-            stringToPass+='<input type="submit" name="'+list1[i][0].id+'" value="Open Chat"/><br><hr>'
+            for user in all_users:
+                if user!=auth_user:
+                    usernames = usernames + str(user) + ","
+            stringToPass+='<input type="radio" name="id-value" value="'+str(list1[i][0].id)+'" >'+ usernames +'<br><hr>'
     
 
     print("printing ss",stringToPass)

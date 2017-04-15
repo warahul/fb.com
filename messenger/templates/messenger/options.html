@@ -1,13 +1,15 @@
-{%for option,id in zip%}
-{{option}}
 <form action="{% url 'messenger:openchat' %}" method="post">
-{% csrf_token %}
-<button>Choose</button>
-<input type="hidden" name="hidden" value={{id}}>
+    {% csrf_token %}
+{%for option,id in zip%}
+
+<input type="radio" name="id-value" value={{id}} > {{option}}<br>
+
+{%endfor%}
+<input type="submit" value="Open Chat">
 </form>
 <br>
 <br>
-{%endfor%}
+
 <br>
 If you are not seeing any message, then probably no chat with the 2 users exist.
 <a href="{% url 'messenger:Sitelogin' %}">Return Back</a>

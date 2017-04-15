@@ -64,10 +64,15 @@ Welcome {{user.username}},
 
 <form action="{% url 'messenger:openchat' %}" method="post">
     {% csrf_token %}
-<div id="notSeenDisplay">
+    <div id="notSeenDisplay">
 
-</div>
+    </div>
+
+        <input type="submit" name="submitButton" value="Open Chat">
 </form>
+
+
+
 
 
 <hr>
